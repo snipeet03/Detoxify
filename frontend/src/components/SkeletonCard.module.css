@@ -1,0 +1,8 @@
+.card {}
+.thumb { aspect-ratio:16/9; border-radius:12px; width:100%; }
+.body { display:flex; gap:10px; padding:10px 0; }
+.avatar { width:36px; height:36px; border-radius:50%; flex-shrink:0; }
+.lines { flex:1; display:flex; flex-direction:column; gap:8px; padding-top:2px; }
+.line { height:13px; border-radius:6px; width:95%; }
+.lineShort { height:12px; border-radius:6px; width:60%; }
+.lineXs { height:11px; border-radius:6px; width:40%; }

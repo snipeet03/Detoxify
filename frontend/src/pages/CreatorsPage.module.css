@@ -1,0 +1,59 @@
+.page { padding-bottom: 60px; }
+
+.topBar {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+.title { font-size: 22px; font-weight: 700; }
+
+.filters { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.chip {
+  padding: 6px 14px; border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  background: var(--bg2); border: 1px solid var(--border);
+  color: var(--text2); cursor: pointer; transition: background 0.15s;
+}
+.chip:hover { background: var(--bg3); color: var(--text); }
+.chip.chipActive { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px;
+  padding: 20px 24px;
+}
+
+.skeleton { height: 70px; border-radius: 10px; }
+
+.card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text);
+  text-decoration: none; transition: background 0.15s;
+}
+.card:hover { background: var(--bg3); }
+
+.rank { font-size: 11px; color: var(--text3); font-weight: 600; min-width: 22px; }
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #065fd4, #3ea6ff);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 16px; color: white;
+}
+.info { flex: 1; min-width: 0; }
+.name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.subs { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.score { font-size: 12px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+
+.empty {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 12px;
+  padding: 80px 24px; text-align: center; color: var(--text2);
+}
+.empty span { font-size: 3rem; }
+.empty h3 { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+.empty p { font-size: 14px; }
