@@ -3,6 +3,9 @@ const logger = require('../utils/logger');
 
 const CACHE_TTL = parseInt(process.env.CACHE_TTL || '21600', 10); // 6 hours
 
+// In-memory cache fallback when Redis is unavailable
+const memoryCache = new Map();
+
 /**
  * Build a consistent cache key
  */
@@ -17,15 +20,25 @@ function buildCacheKey(keyword, type, level) {
  */
 async function getCached(key) {
   const redis = getRedis();
-  if (!redis) return null;
-
-  try {
-    const raw = await redis.get(key);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch (err) {
-    logger.warn('Cache read error:', err.message);
-    return null;
+  if (redis) {
+    try {
+      const raw = await redis.get(key);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (err) {
+      logger.warn('Cache read error:', err.message);
+      return null;
+    }
+  } else {
+    // Fallback to in-memory cache
+    const cached = memoryCache.get(key);
+    if (!cached) return null;
+    if (Date.now() > cached.expiresAt) {
+      memoryCache.delete(key);
+      return null;
+    }
+    logger.info(`Memory cache HIT: ${key}`);
+    return cached.data;
   }
 }
 
@@ -34,15 +47,21 @@ async function getCached(key) {
  */
 async function setCached(key, data, ttl = CACHE_TTL) {
   const redis = getRedis();
-  if (!redis) return false;
-
-  try {
-    await redis.setex(key, ttl, JSON.stringify(data));
-    logger.info(`Cache SET: ${key} (TTL: ${ttl}s)`);
+  if (redis) {
+    try {
+      await redis.setex(key, ttl, JSON.stringify(data));
+      logger.info(`Cache SET: ${key} (TTL: ${ttl}s)`);
+      return true;
+    } catch (err) {
+      logger.warn('Cache write error:', err.message);
+      return false;
+    }
+  } else {
+    // Fallback to in-memory cache
+    const expiresAt = Date.now() + (ttl * 1000);
+    memoryCache.set(key, { data, expiresAt });
+    logger.info(`Memory cache SET: ${key} (TTL: ${ttl}s)`);
     return true;
-  } catch (err) {
-    logger.warn('Cache write error:', err.message);
-    return false;
   }
 }
 
@@ -51,14 +70,18 @@ async function setCached(key, data, ttl = CACHE_TTL) {
  */
 async function deleteCached(key) {
   const redis = getRedis();
-  if (!redis) return false;
-
-  try {
-    await redis.del(key);
+  if (redis) {
+    try {
+      await redis.del(key);
+      return true;
+    } catch (err) {
+      logger.warn('Cache delete error:', err.message);
+      return false;
+    }
+  } else {
+    // Fallback to in-memory cache
+    memoryCache.delete(key);
     return true;
-  } catch (err) {
-    logger.warn('Cache delete error:', err.message);
-    return false;
   }
 }
 
@@ -67,13 +90,16 @@ async function deleteCached(key) {
  */
 async function listKeys(prefix = 'feed:') {
   const redis = getRedis();
-  if (!redis) return [];
-
-  try {
-    return await redis.keys(`${prefix}*`);
-  } catch (err) {
-    logger.warn('Cache list error:', err.message);
-    return [];
+  if (redis) {
+    try {
+      return await redis.keys(`${prefix}*`);
+    } catch (err) {
+      logger.warn('Cache list error:', err.message);
+      return [];
+    }
+  } else {
+    // Fallback to in-memory cache
+    return Array.from(memoryCache.keys()).filter(key => key.startsWith(prefix));
   }
 }
 

@@ -10,6 +10,11 @@ export const useAppStore = create(
       setFeedResults: (results, query) => set({ feedResults: results, lastQuery: query }),
       clearFeed: () => set({ feedResults: null, lastQuery: null }),
 
+      // User cards (personalized topic grid)
+      userCards: [],
+      setUserCards: (cards) => set({ userCards: cards }),
+      addUserCard: (card) => set((state) => ({ userCards: [...state.userCards, card] })),
+
       // Auth state
       user: null,
       token: null,
@@ -50,6 +55,7 @@ export const useAppStore = create(
         token: state.token,
         watchHistory: state.watchHistory,
         bookmarks: state.bookmarks,
+        userCards: state.userCards,
       }),
     }
   )

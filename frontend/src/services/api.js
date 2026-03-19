@@ -36,4 +36,9 @@ export const creatorsApi = {
   list: (category) => api.get('/creators', { params: { category } }),
 };
 
+export const cardsApi = {
+  getCards: () => api.get('/user/cards'),
+  addCard: (keyword) => api.post('/user/cards', { keyword }),
+};
+
 export default api;

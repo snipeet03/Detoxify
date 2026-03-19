@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const Joi = require('joi');
 const User = require('../models/User');
 const logger = require('../utils/logger');
+const { DEFAULT_CARDS } = require('./cardController');
 
 const registerSchema = Joi.object({
   name: Joi.string().trim().min(2).max(50).required(),
@@ -31,7 +32,7 @@ async function register(req, res, next) {
     if (existing) return res.status(409).json({ success: false, message: 'Email already registered' });
 
     const hashed = await bcrypt.hash(value.password, 12);
-    const user = await User.create({ ...value, password: hashed });
+    const user = await User.create({ ...value, password: hashed, cards: DEFAULT_CARDS });
 
     const token = signToken(user._id);
     logger.info(`New user registered: ${user.email}`);
@@ -39,7 +40,7 @@ async function register(req, res, next) {
     res.status(201).json({
       success: true,
       token,
-      user: { id: user._id, name: user.name, email: user.email, interests: user.interests },
+      user: { id: user._id, name: user.name, email: user.email, interests: user.interests, cards: user.cards },
     });
   } catch (err) {
     next(err);
@@ -60,7 +61,7 @@ async function login(req, res, next) {
     res.json({
       success: true,
       token,
-      user: { id: user._id, name: user.name, email: user.email, interests: user.interests },
+      user: { id: user._id, name: user.name, email: user.email, interests: user.interests, cards: user.cards },
     });
   } catch (err) {
     next(err);

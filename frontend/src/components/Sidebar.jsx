@@ -26,13 +26,7 @@ const NAV = [
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 13H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zm-2 6H6v-4h12v4zM4 11h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1zm2-6h12v4H6V5z"/></svg>
     ),
   },
-  {
-    label: 'Bookmarks',
-    to: '/feed',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
-    ),
-  },
+ 
 ];
 
 export default function Sidebar() {

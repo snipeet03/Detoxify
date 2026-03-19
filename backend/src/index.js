@@ -13,6 +13,7 @@ const { rateLimiter } = require('./middlewares/rateLimiter');
 const feedRoutes = require('./routes/feed');
 const authRoutes = require('./routes/auth');
 const creatorRoutes = require('./routes/creators');
+const userRoutes = require('./routes/user');
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.get('/health', (req, res) => {
 app.use('/api/feed', feedRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/creators', creatorRoutes);
+app.use('/api/user', userRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
