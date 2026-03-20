@@ -6,7 +6,6 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true, select: false },
     interests: [{ type: String }],
-    cards: { type: [String], default: [] },
     watchHistory: [
       {
         videoId: String,

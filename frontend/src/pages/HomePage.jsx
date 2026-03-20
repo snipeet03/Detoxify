@@ -1,26 +1,39 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFeed } from '../hooks/useFeed';
-import { useCards } from '../hooks/useCards';
 import { useAppStore } from '../store/useAppStore';
 import VideoCard from '../components/VideoCard';
 import SkeletonCard from '../components/SkeletonCard';
-import TopicCard from '../components/TopicCard';
-import AddCardModal from '../components/AddCardModal';
 import styles from './HomePage.module.css';
 
+const CHIPS = [
+  { label: 'All',               keyword: '',               type: 'both' },
+  { label: 'Machine Learning',  keyword: 'machine learning', type: 'long' },
+  { label: 'Web Dev',           keyword: 'web development', type: 'both' },
+  { label: 'DSA',               keyword: 'data structures algorithms', type: 'long' },
+  { label: 'System Design',     keyword: 'system design interview', type: 'long' },
+  { label: 'Python',            keyword: 'python programming', type: 'both' },
+  { label: 'React',             keyword: 'react tutorial', type: 'both' },
+  { label: 'DevOps',            keyword: 'docker kubernetes devops', type: 'long' },
+  { label: 'AI / LLMs',         keyword: 'large language models AI', type: 'both' },
+  { label: 'JavaScript',        keyword: 'javascript tutorial', type: 'both' },
+  { label: 'SQL',               keyword: 'sql database tutorial', type: 'long' },
+  { label: 'TypeScript',        keyword: 'typescript tutorial', type: 'both' },
+  { label: 'Shorts',            keyword: 'coding tips', type: 'short' },
+];
+
 export default function HomePage() {
-  const [activeCard, setActiveCard] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [activeChip, setActiveChip] = useState(0);
   const navigate = useNavigate();
   const { generate, loading } = useFeed();
   const { feedResults } = useAppStore();
-  const { cards, loading: cardsLoading, addLoading, addCard, isLoggedIn } = useCards();
 
-  async function pickCard(keyword) {
-    setActiveCard(keyword);
+  async function pickChip(idx) {
+    setActiveChip(idx);
+    const chip = CHIPS[idx];
+    if (!chip.keyword) return;
     try {
-      await generate({ keyword, type: 'both' });
+      await generate({ keyword: chip.keyword, type: chip.type });
     } catch (_) {}
   }
 
@@ -34,56 +47,42 @@ export default function HomePage() {
   return (
     <div className={styles.page}>
 
-      {/* ── HERO (when no card selected) ── */}
-      {!activeCard && !feedResults && (
+      {/* ── CHIPS ── */}
+      <div className={styles.chipsWrap}>
+        {CHIPS.map((c, i) => (
+          <button
+            key={c.label}
+            className={`${styles.chip} ${activeChip === i ? styles.chipActive : ''}`}
+            onClick={() => pickChip(i)}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── HERO (when no chip selected) ── */}
+      {activeChip === 0 && !feedResults && (
         <div className={styles.hero}>
           <div className={styles.heroInner}>
             <div className={styles.heroBadge}>⚡ Distraction-Free Learning</div>
             <h1 className={styles.heroTitle}>YouTube without the rabbit hole.</h1>
-            <p className={styles.heroSub}>
-              Pick a topic below to generate your curated learning feed — no autoplay, no infinite scroll, no algorithmic noise.
-            </p>
+            <p className={styles.heroSub}>Pick a topic above to generate your curated learning feed — no autoplay, no infinite scroll, no algorithmic noise.</p>
           </div>
 
-          {/* ── TOPIC GRID ── */}
-          {!isLoggedIn ? (
-            <div className={styles.loginPrompt}>
-              <span className={styles.loginIcon}>🔐</span>
-              <p>Log in to get your personalized topic cards</p>
-              <button className={styles.loginBtn} onClick={() => navigate('/login')}>
-                Log In
-              </button>
-            </div>
-          ) : cardsLoading ? (
-            <div className={styles.topicsGrid}>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className={styles.skeletonCard} style={{ animationDelay: `${i * 60}ms` }} />
-              ))}
-            </div>
-          ) : (
-            <div className={styles.topicsGrid}>
-              {cards.map((card, i) => (
-                <TopicCard
-                  key={card}
-                  label={card}
-                  index={i}
-                  onClick={pickCard}
-                />
-              ))}
-
-              {/* ── ADD CARD BUTTON ── */}
+          {/* Suggested topics grid */}
+          <div className={styles.topicsGrid}>
+            {CHIPS.slice(1).map((chip, i) => (
               <button
-                className={styles.addCard}
-                onClick={() => setModalOpen(true)}
-                disabled={addLoading}
-                title="Add new topic card"
-                style={{ animationDelay: `${cards.length * 40}ms` }}
+                key={chip.label}
+                className={styles.topicCard}
+                onClick={() => pickChip(i + 1)}
+                style={{ animationDelay: `${i * 40}ms` }}
               >
-                <span className={styles.addIcon}>+</span>
-                <span className={styles.addLabel}>Add Card</span>
+                <span className={styles.topicIcon}>{TOPIC_ICONS[i] || '📚'}</span>
+                <span className={styles.topicLabel}>{chip.label}</span>
               </button>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       )}
 
@@ -99,16 +98,6 @@ export default function HomePage() {
       {/* ── RESULTS ── */}
       {!loading && feedResults && (
         <div className={styles.results}>
-
-          {/* Active chip label */}
-          {activeCard && (
-            <div className={styles.resultHeader}>
-              <button className={styles.backBtn} onClick={() => { setActiveCard(null); }}>
-                ← Back to topics
-              </button>
-              <span className={styles.activeLabel}>Results for: <strong>{activeCard}</strong></span>
-            </div>
-          )}
 
           {/* Long-form videos */}
           {longVideos.length > 0 && (
@@ -154,7 +143,7 @@ export default function HomePage() {
                     className={styles.creatorChip}
                   >
                     <span className={styles.creatorAvatar}>
-                      {(c.channelTitle || '?')[0].toUpperCase()}
+                      {(c.channelTitle||'?')[0].toUpperCase()}
                     </span>
                     {c.channelTitle}
                   </a>
@@ -170,18 +159,11 @@ export default function HomePage() {
         <div className={styles.empty}>
           <span>🔍</span>
           <h3>No results found</h3>
-          <p>Try a different topic card.</p>
+          <p>Try a different topic chip above.</p>
         </div>
       )}
-
-      {/* ── ADD CARD MODAL ── */}
-      <AddCardModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onAdd={addCard}
-        currentCount={cards.length}
-        maxCards={15}
-      />
     </div>
   );
 }
+
+const TOPIC_ICONS = ['🤖','🌐','🧮','🏗️','🐍','⚛️','🐳','🧠','🟨','🗃️','📘','⚡'];
