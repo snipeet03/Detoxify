@@ -1,34 +1,30 @@
 # ⚡ Detoxify — Learn Without the Algorithm
 
-A distraction-free YouTube learning platform with a full YouTube-style UI.
-No infinite scroll. No autoplay. No algorithmic rabbit holes.
-Just curated, ranked, high-signal video feeds on any topic you choose.
+YouTube-style UI + distraction-free curated learning feeds.
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Running the Project (Step by Step)
 
-### Prerequisites
-- Node.js 18+
-- MongoDB (local or Atlas)
-- Redis (local or Redis Cloud) — optional but recommended
-- YouTube Data API v3 key → https://console.developers.google.com/
+### Step 1 — Install dependencies
 
----
-
-### 1. Backend Setup
-
+**Backend:**
 ```bash
 cd backend
 npm install
-cp .env.example .env      # fill in your values
-npm run dev               # runs on http://localhost:5000
 ```
 
-### 2. Frontend Setup
-
+**Frontend:**
 ```bash
 cd frontend
 npm install
-npm run dev               # runs on http://localhost:5173
+```
+
+---
+
+### Step 2 — Start Backend
+
+```bash
+cd backend
+npm run dev
 ```

@@ -1,12 +1,12 @@
 {
   "name": "detoxify-backend",
   "version": "1.0.0",
-  "description": "Detoxify - Distraction-free YouTube learning platform backend",
+  "description": "Detoxify backend — distraction-free YouTube learning",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand --forceExit"
   },
   "dependencies": {
     "axios": "^1.6.0",

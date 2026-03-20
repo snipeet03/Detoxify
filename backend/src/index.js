@@ -1,7 +1,9 @@
+// Load env FIRST before anything else
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const dotenv = require('dotenv');
 const { connectDB } = require('./config/database');
 const { connectRedis } = require('./config/redis');
 const { setupJobs } = require('./jobs/scheduler');
@@ -14,16 +16,23 @@ const feedRoutes = require('./routes/feed');
 const authRoutes = require('./routes/auth');
 const creatorRoutes = require('./routes/creators');
 
-dotenv.config();
-
 const app = express();
 
-// Security middlewares
-app.use(helmet());
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true
+// Security
+app.use(helmet({
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: false,
 }));
+
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    process.env.CLIENT_URL,
+  ].filter(Boolean),
+  credentials: true,
+}));
+
 app.use(express.json({ limit: '10kb' }));
 app.use(rateLimiter);
 
@@ -37,7 +46,7 @@ app.use('/api/feed', feedRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/creators', creatorRoutes);
 
-// 404 handler
+// 404
 app.use('*', (req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
@@ -50,14 +59,15 @@ const PORT = process.env.PORT || 5000;
 async function startServer() {
   try {
     await connectDB();
-    await connectRedis();
+    await connectRedis(); // safe — never throws
     setupJobs();
 
     app.listen(PORT, () => {
-      logger.info(`🚀 Detoxify server running on port ${PORT}`);
+      logger.info(`🚀 Detoxify running on http://localhost:${PORT}`);
+      logger.info(`🔑 YouTube API: ${process.env.YOUTUBE_API_KEY ? '✅ loaded' : '❌ MISSING'}`);
     });
   } catch (err) {
-    logger.error('Failed to start server:', err);
+    logger.error('Failed to start server:', err.message);
     process.exit(1);
   }
 }

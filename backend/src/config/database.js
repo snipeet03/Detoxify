@@ -3,8 +3,10 @@ const logger = require('../utils/logger');
 
 async function connectDB() {
   try {
+    mongoose.set('strictQuery', false);
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
     });
     logger.info(`✅ MongoDB connected: ${conn.connection.host}`);
   } catch (err) {

@@ -1,24 +1,28 @@
 import axios from 'axios';
 
+const BASE_URL = import.meta.env.VITE_API_URL || '';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: `${BASE_URL}/api`,
   timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Attach JWT token if available
+// Attach JWT if present
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('detoxify_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Response normalizer
+// Unwrap responses, surface error messages
 api.interceptors.response.use(
   (res) => res.data,
   (err) => {
     const message =
-      err?.response?.data?.message || err.message || 'An error occurred';
+      err?.response?.data?.message ||
+      err?.message ||
+      'Something went wrong. Please try again.';
     return Promise.reject(new Error(message));
   }
 );
@@ -29,11 +33,11 @@ export const feedApi = {
 
 export const authApi = {
   register: (payload) => api.post('/auth/register', payload),
-  login: (payload) => api.post('/auth/login', payload),
+  login:    (payload) => api.post('/auth/login', payload),
 };
 
 export const creatorsApi = {
-  list: (category) => api.get('/creators', { params: { category } }),
+  list: (category) => api.get('/creators', { params: category ? { category } : {} }),
 };
 
 export default api;
